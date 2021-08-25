@@ -1,0 +1,47 @@
+{% extends './base.html' %}
+{% block content %}
+NEW
+<div class="container">
+    <div class="row-10">
+        <div class="col">
+            <form method="POST" action="/shows/new">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name= "title" aria-describedby="">
+                    <!--id="title" name= "title" deben ser iguales-->
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="network" class="form-label">Network</label>
+                            <select class="form-select" aria-label="Default select example" id="network" name= "network_id">
+                                <option selected>Seleccione opcion</option>
+                                {% for net in networks %}
+                                    <option value="{{net.id}}">{{net.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="release_date" class="form-label">Release_date</label>
+                            <input type="date" class="form-control" id="release_date" name= "release_date" placeholder="" aria-label="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name= "description"  rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">   
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </div>
+              </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

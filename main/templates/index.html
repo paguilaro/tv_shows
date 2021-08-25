@@ -1,0 +1,33 @@
+{% extends './base.html' %}
+{% block content %}
+ALL SHOWS
+<div class="container">
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Title</th>
+            <th scope="col">Network</th>
+            <th scope="col">Release_date</th>
+            <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for show in shows%}
+            <tr>
+                <th scope="row">{{show.id}}</th>
+                <td>{{show.title}}</td>
+                <td>{{show.network.name}}</td>
+                <td>{{show.release_date}}</td>
+                <td>
+                    <a href="/shows/{{show.id}}">View</a>
+                    <a href="/shows/{{show.id}}/edit">Edit</a>
+                    <a href="/shows/{{show.id}}/delete">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+    
+        </tbody>
+    </table>
+</div>
+{% endblock %}

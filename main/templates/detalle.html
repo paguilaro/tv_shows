@@ -1,0 +1,23 @@
+{% extends './base.html' %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-10"><h1>TV SHOW {{show.id}}</h1></div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h3>Name {{show.title}}</h3>
+            <h3>Network {{show.network.name}}</h3>
+            <h3>Release_date{{show.release_date}}</h3>
+            <h3>Description{{show.description}}</h3>
+            <h3>Last Updated{{show.updated_at}}</h3>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
