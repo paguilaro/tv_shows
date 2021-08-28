@@ -8,17 +8,20 @@ EDIT
         </div>
     </div>
     <div class="row-10">
-        <div class="col">
-            <!--<form method="POST" action="/shows/show_id/edit">-->
-                <!--{% csrf_token %}-->
+        <div class="col">      
+            <form method="POST" action="/shows/show_id/edit">
+            {% csrf_token %}
+            <div>
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" name= "title" aria-describedby="">
+                <!--id="title" name= "title" deben ser iguales-->
+                </div>
                 <!--TITULO-->
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
                     <input type="text" class="form-control" id="name" name= "title" aria-describedby="" value="{{show.title}}">
                 </div>
                 <div class="row">
-                <form method="POST" action="/shows/<id>/edit">
-                    {% csrf_token %}
                     <!--NETWORK-->
                     <div class="col">
                         <label for="network" class="form-label">Network</label>
@@ -31,7 +34,7 @@ EDIT
                     </div>
                     <!--FECHA-->
                     <div class="col">
-                        <label for="release_date" class="form-label">Realease_date</label>
+                        <label for="release_date" class="form-label">Release_date</label>
                         <input type="date" class="form-control" id= release_date name= release_date placeholder="" aria-label="" value="{{release_date}}">
                     </div>
                 </div>
@@ -51,6 +54,7 @@ EDIT
                         <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </div>
+            </div>
             </form>
         </div>
     </div>

@@ -1,5 +1,6 @@
+import bcrypt
 from django.shortcuts import render, HttpResponse, redirect
-from .models import Show, Network
+from .models import Show, Network, Users
 
 def index(request):
     shows=Show.objects.all()
@@ -78,3 +79,67 @@ def delete(request, show_id):
 
     #redirigir 
     return redirect('/shows')
+
+
+def register(request):
+    #si llega por el GET muestro el template
+    if request.method == 'GET':
+        return render(request, 'register.html')
+    #si llega por un POST, hay que tomar los valores 
+    #del formulario y crear un nuevo usuario. 
+
+    #verificar name, email, password y pasword_confirm
+    name = request.POST['name']
+    email = request.POST['email']
+    password = request.POST['password']
+    password_confirm = request.POST['password_confirm']
+    #validar que ambas contrasenas sean iguales
+    #si no son iguales envia mensaje de error 
+    #y redirige a path/register nuevamente y entra nuevamente por el if, no necesita else
+    if password != password_confirm:
+        messages.error('Las contrasenas no coinciden, intente nuevamente')
+        return redirect('/register')
+
+    #Incluir en import linea 2 de este archivo (views.py)
+    #Si llego aca, las contrasenas coinciden 
+    #e inicia registro en base de datos con el nombre user
+    user = Users.objects.create(
+        #pasamos los parametros del request.POST
+        name=name,
+        email=email,
+        password=password
+    )
+    #se necesita guardar en sesion en un diccionario c/datos de usuario
+    request.session['user']= {
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'avatar': user.avatar
+    }
+    #y se reenvia a pagina principal landing
+    return redirect('/shows')
+
+def login(request):
+    email = request.POST['email']
+    password = request.POST['password']
+    try:
+        user= Users.objects.get(email=email) 
+    except Users.DoesNotExist:
+        messages.error(request, 'Usuario inexistente o contrasena incorrecta')
+        return redirect('/register')
+
+    #si entramos aca, estamos seguros que al menos el usuario existe
+    if  not bcrypt.checkpw(password.encode(), user.password.encode()):
+        messages.error(request, 'Usuario inexistente o contrasena incorrecta')
+        return redirect('/register')
+
+    #si entra por este request, el usuario y la contrasena esta correcta, y entra a sesion
+    request.session['user']={
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'avatar': user.avatar
+    }
+    messages.success(request, f'Hola {user.name}')
+    return redirect('/shows') 
+
