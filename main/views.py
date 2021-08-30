@@ -1,6 +1,7 @@
 import bcrypt
 from django.shortcuts import render, HttpResponse, redirect
 from .models import Show, Network, Users
+from django.contrib import messages 
 
 def index(request):
     shows=Show.objects.all()
@@ -85,20 +86,24 @@ def register(request):
     #si llega por el GET muestro el template
     if request.method == 'GET':
         return render(request, 'register.html')
-    #si llega por un POST, hay que tomar los valores 
-    #del formulario y crear un nuevo usuario. 
 
-    #verificar name, email, password y pasword_confirm
-    name = request.POST['name']
-    email = request.POST['email']
-    password = request.POST['password']
-    password_confirm = request.POST['password_confirm']
-    #validar que ambas contrasenas sean iguales
-    #si no son iguales envia mensaje de error 
-    #y redirige a path/register nuevamente y entra nuevamente por el if, no necesita else
-    if password != password_confirm:
-        messages.error('Las contrasenas no coinciden, intente nuevamente')
-        return redirect('/register')
+    else:
+        #si llega por un POST, tomar valores del formulario
+        #y crear un nuevo usuario
+        name = request.POST['name']
+        email = request.POST['email']
+        password = request.POST['password']
+        password_confirm = request.POST['password_confirm']
+
+        #validar que el formulario este correcto
+        errors = Users.objects.basic_validator(request.POST)
+        if len(errors) > 0:
+            #en este caso, hay al menos 1 error en el formulario
+            #voy a mostrarle los errores al usuario
+            for llave, mensaje_de_error in errors.items():
+                messages.error(request, mensaje_de_error)
+
+            return redirect('/register')
 
     #Incluir en import linea 2 de este archivo (views.py)
     #Si llego aca, las contrasenas coinciden 
@@ -107,7 +112,7 @@ def register(request):
         #pasamos los parametros del request.POST
         name=name,
         email=email,
-        password=password
+        password=bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     )
     #se necesita guardar en sesion en un diccionario c/datos de usuario
     request.session['user']= {
@@ -117,6 +122,7 @@ def register(request):
         'avatar': user.avatar
     }
     #y se reenvia a pagina principal landing
+    messages.success(request, 'Usuario creado con exito')
     return redirect('/shows')
 
 def login(request):
@@ -143,3 +149,6 @@ def login(request):
     messages.success(request, f'Hola {user.name}')
     return redirect('/shows') 
 
+def logout(request):
+    request.session['user'] = None
+    return redirect('/register')
