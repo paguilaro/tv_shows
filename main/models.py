@@ -48,7 +48,7 @@ class Show(models.Model):
 
 class Users(models.Model):
     name = models.CharField(max_length=255)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
     allowed = models.BooleanField(default=True)
     avatar = models.URLField(

@@ -9,13 +9,9 @@ EDIT
     </div>
     <div class="row-10">
         <div class="col">      
-            <form method="POST" action="/shows/show_id/edit">
+            <form method="POST" action="/shows/{{show.id}}/edit">
             {% csrf_token %}
-            <div>
-                <label for="title" class="form-label">Title</label>
-                <input type="text" class="form-control" id="title" name= "title" aria-describedby="">
-                <!--id="title" name= "title" deben ser iguales-->
-                </div>
+            
                 <!--TITULO-->
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
@@ -25,7 +21,7 @@ EDIT
                     <!--NETWORK-->
                     <div class="col">
                         <label for="network" class="form-label">Network</label>
-                        <select class="form-select" id="network" name= "network" aria-label="Default select example">
+                        <select class="form-select" id="network" name= "network_id" aria-label="Default select example">
                             <option selected>Open this select menu</option>
                             {% for net in networks %}
                             <option {% if net.id == show.network.id %}selected="selected"{% endif %} value="{{net.id}}">{{net.name}}</option>

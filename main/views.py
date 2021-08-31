@@ -1,8 +1,11 @@
 import bcrypt
 from django.shortcuts import render, HttpResponse, redirect
 from .models import Show, Network, Users
-from django.contrib import messages 
+from django.contrib import messages
+from django.db import IntegrityError 
+from .decorators import login_protect
 
+@login_protect
 def index(request):
     shows=Show.objects.all()
     context = {
@@ -12,6 +15,7 @@ def index(request):
     return render(request, 'index.html', context)
 
 # shows/new
+@login_protect
 def new(request):
     #get : muestra el formulario con los datos del show para modificar
     if request.method=="GET":
@@ -34,6 +38,7 @@ def new(request):
         return redirect('/shows')
 
 # shows/<show_id>/edit
+@login_protect
 def edit(request, show_id):
     #get : muestra el formulario con los datos del show para modificar
     if request.method=="GET":
@@ -56,14 +61,22 @@ def edit(request, show_id):
         network_id = request.POST['network_id']
         release_date = request.POST['release_date']
         description= request.POST['description']
-        # después creamos el nuevo Show
-        Show.objects.create(title=title, network_id=network_id, release_date=release_date, description=description)
+        # después editamos el Show
+        target_show=Show.objects.get(id=show_id)
+        target_show.title=title
+        target_show.network_id=network_id
+        target_show.release_date=release_date
+        target_show.description=description
+        target_show.save()
+
+        #Show.objects.create(title=title, network_id=network_id, release_date=release_date, description=description)
         # Finalmente devolvemos al usuario a la pantalla de los shows
-        return redirect('/shows/<show_id>/edit') 
+        return redirect('/shows ') 
     #post actualiza los datos
     #if request.method=="POST":
     #title = request.POST['title']
 
+@login_protect
 def detalle(request, show_id):
     s=Show.objects.get(id=show_id)
 
@@ -72,6 +85,7 @@ def detalle(request, show_id):
     }
     return render(request, 'detalle.html', context)
 
+@login_protect
 def delete(request, show_id):
     #lo vamos a buscar
     s=Show.objects.get(id=show_id)
@@ -108,22 +122,29 @@ def register(request):
     #Incluir en import linea 2 de este archivo (views.py)
     #Si llego aca, las contrasenas coinciden 
     #e inicia registro en base de datos con el nombre user
-    user = Users.objects.create(
-        #pasamos los parametros del request.POST
-        name=name,
-        email=email,
-        password=bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-    )
-    #se necesita guardar en sesion en un diccionario c/datos de usuario
-    request.session['user']= {
-        'id': user.id,
-        'name': user.name,
-        'email': user.email,
-        'avatar': user.avatar
-    }
+    try:
+        user = Users.objects.create(
+            #pasamos los parametros del request.POST
+            name=name,
+            email=email,
+            password=bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        )
+        
+        #se necesita guardar en sesion en un diccionario c/datos de usuario
+        request.session['user']= {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'avatar': user.avatar
+        }
+        messages.success(request, 'Usuario creado con exito')
+        return redirect('/shows')
+    except IntegrityError:
+        messages.error(request, 'Usuario ya existe')
+        return redirect('/register')
+
     #y se reenvia a pagina principal landing
-    messages.success(request, 'Usuario creado con exito')
-    return redirect('/shows')
+    
 
 def login(request):
     email = request.POST['email']
@@ -150,5 +171,6 @@ def login(request):
     return redirect('/shows') 
 
 def logout(request):
-    request.session['user'] = None
+    #request.session.clear()
+    del request.session['user'] 
     return redirect('/register')
